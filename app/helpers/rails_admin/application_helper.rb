@@ -27,7 +27,7 @@ module RailsAdmin
       return nil unless authorized?(:edit, _current_user.class, _current_user) && _current_user.respond_to?(:email)
       return nil unless abstract_model = RailsAdmin.config(_current_user.class).abstract_model
       return nil unless edit_action = RailsAdmin::Config::Actions.find(:edit, {:controller => self.controller, :abstract_model => abstract_model, :object => _current_user })
-      link_to _current_user.email, url_for(:action => edit_action.action_name, :model_name => abstract_model.to_param, :id => _current_user.id, :controller => 'rails_admin/main')
+      link_to _current_user.name, "/usres/#{_current_user.id}"
     end
 
     def wording_for(label, action = @action, abstract_model = @abstract_model, object = @object)
@@ -43,13 +43,13 @@ module RailsAdmin
     end
 
     def main_navigation
-      nodes_stack = RailsAdmin::Config.visible_models(:controller => self.controller)
+      nodes_stack = RailsAdmin::Config.visible_models(:controller => self.controller)      
       nodes_stack.group_by(&:navigation_label).map do |navigation_label, nodes|
 
         li_stack = nodes.select{|n| n.parent.nil? || !n.parent.to_s.in?(nodes_stack.map{|c| c.abstract_model.model_name }) }.map do |node|
           %{
             <li data-model="#{node.abstract_model.to_param}">
-              <a class="pjax" href="#{url_for(:action => :index, :controller => 'rails_admin/main', :model_name => node.abstract_model.to_param)}">#{node.label_plural}</a>
+              <a class="pjax" href="/admin/#{node.abstract_model.to_param}">#{node.label_plural}</a>
             </li>
             #{navigation(nodes_stack, nodes_stack.select{|n| n.parent.to_s == node.abstract_model.model_name}, 1)}
           }.html_safe
@@ -62,6 +62,7 @@ module RailsAdmin
         li_stack
       end.join.html_safe
     end
+    
 
     def static_navigation
       li_stack = RailsAdmin::Config.navigation_static_links.map do |title, url|
