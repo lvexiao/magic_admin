@@ -20,7 +20,7 @@ module RailsAdmin
       end
 
       def get(id)
-        if object = model.where(model.primary_key => id).first
+        if object = model.unscoped.where(model.primary_key => id).first
           AbstractObject.new object
         else
           nil
@@ -28,7 +28,7 @@ module RailsAdmin
       end
 
       def scoped
-        model.scoped
+        model.unscoped
       end
 
       def first(options = {}, scope = nil)
